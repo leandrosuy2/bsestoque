@@ -5,15 +5,24 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Payslip;
 use App\Models\Employee;
+use Illuminate\Support\Facades\Auth;
 
 class PayslipController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('company.access');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $payslips = Payslip::all();
+        $user = Auth::user();
+        $payslips = Payslip::whereHas('employee', function($query) use ($user) {
+            $query->where('company_id', $user->company_id);
+        })->with('employee')->orderBy('competencia', 'desc')->paginate(15);
         return view('payslips.index', compact('payslips'));
     }
 
@@ -22,7 +31,8 @@ class PayslipController extends Controller
      */
     public function create()
     {
-        $employees = Employee::all();
+        $user = Auth::user();
+        $employees = Employee::where('company_id', $user->company_id)->orderBy('name')->get();
         return view('payslips.create', compact('employees'));
     }
 

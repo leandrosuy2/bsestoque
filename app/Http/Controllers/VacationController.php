@@ -5,15 +5,24 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Vacation;
 use App\Models\Employee;
+use Illuminate\Support\Facades\Auth;
 
 class VacationController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('company.access');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $vacations = Vacation::all();
+        $user = Auth::user();
+        $vacations = Vacation::whereHas('employee', function($query) use ($user) {
+            $query->where('company_id', $user->company_id);
+        })->with('employee')->orderBy('data_inicio', 'desc')->paginate(15);
         return view('vacations.index', compact('vacations'));
     }
 
@@ -22,7 +31,8 @@ class VacationController extends Controller
      */
     public function create()
     {
-        $employees = Employee::all();
+        $user = Auth::user();
+        $employees = Employee::where('company_id', $user->company_id)->orderBy('name')->get();
         return view('vacations.create', compact('employees'));
     }
 

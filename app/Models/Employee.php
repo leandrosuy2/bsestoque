@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BelongsToCompany;
 
 class Employee extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToCompany;
 
     protected $fillable = [
         'name',
@@ -20,6 +21,7 @@ class Employee extends Model
         'password',
         'permission_level',
         'active',
+        'company_id',
     ];
 
     protected $hidden = ['password'];

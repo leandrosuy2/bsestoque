@@ -9,12 +9,11 @@
 <body class="bg-gray-50 min-h-screen flex items-center justify-center">
     <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-10 border border-gray-200">
         <div class="flex flex-col items-center mb-8">
-            <div class="bg-gray-800 rounded-full p-3 mb-3">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="white" class="w-8 h-8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5V6.375A2.625 2.625 0 015.625 3.75h12.75A2.625 2.625 0 0121 6.375V7.5M3 7.5v10.125A2.625 2.625 0 005.625 20.25h12.75A2.625 2.625 0 0021 17.625V7.5M3 7.5h18M7.5 11.25h9" />
-                </svg>
-            </div>
-            <h1 class="text-2xl font-bold text-gray-800 mb-1 tracking-tight">BSEstoque</h1>
+                <!-- Logo no topo do login -->
+    <div class="flex justify-center mt-10 mb-8">
+        <img src="/imagens/logo.png" alt="Logo" class="h-16 hidden md:block">
+        <img src="/imagens/logo_fechado.png" alt="Logo Mobile" class="h-10 md:hidden">
+    </div>
             <p class="text-gray-500 text-sm">Acesso ao sistema de gestão de estoque</p>
         </div>
         @if(session('error'))

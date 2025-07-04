@@ -4,12 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class EmployeeController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('company.access');
+    }
+
     public function index()
     {
-        $employees = Employee::orderBy('name')->paginate(15);
+        $user = Auth::user();
+        $employees = Employee::where('company_id', $user->company_id)
+                            ->orderBy('name')
+                            ->paginate(15);
         return view('employees.index', compact('employees'));
     }
 
@@ -20,6 +29,7 @@ class EmployeeController extends Controller
 
     public function store(Request $request)
     {
+        $user = Auth::user();
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'cpf' => 'required|string|max:14|unique:employees,cpf',
@@ -32,7 +42,9 @@ class EmployeeController extends Controller
             'permission_level' => 'required|in:administrador,operador,consulta',
             'active' => 'boolean',
         ]);
+
         $validated['password'] = bcrypt($validated['password']);
+        $validated['company_id'] = $user->company_id;
         Employee::create($validated);
         return redirect()->route('employees.index')->with('success', 'Funcionário cadastrado com sucesso!');
     }

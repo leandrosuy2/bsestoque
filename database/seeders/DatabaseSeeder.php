@@ -15,6 +15,7 @@ use App\Models\Vacation;
 use App\Models\Leave;
 use App\Models\Benefit;
 use App\Models\Payslip;
+use App\Models\Company;
 use Illuminate\Database\Seeder;
 use Carbon\Carbon;
 
@@ -25,114 +26,247 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Usuários
+        // Executar seeder de permissões primeiro
+        $this->call([
+            PermissionSeeder::class,
+            DefaultRolesSeeder::class,
+            UserRoleSeeder::class,
+        ]);
+        // Empresas
+        $empresaAtiva = Company::create([
+            'name' => 'Empresa Ativa',
+            'email' => 'contato@ativa.com',
+            'trial_start' => now()->subDays(2),
+            'trial_end' => now()->addDays(3),
+            'is_active' => true,
+            'paid_until' => null,
+        ]);
+        $empresaExpirada = Company::create([
+            'name' => 'Empresa Expirada',
+            'email' => 'contato@expirada.com',
+            'trial_start' => now()->subDays(10),
+            'trial_end' => now()->subDays(5),
+            'is_active' => true,
+            'paid_until' => null,
+        ]);
+        $empresaPaga = Company::create([
+            'name' => 'Empresa Paga',
+            'email' => 'contato@paga.com',
+            'trial_start' => now()->subDays(10),
+            'trial_end' => now()->subDays(5),
+            'is_active' => true,
+            'paid_until' => now()->addDays(30),
+        ]);
+        $empresaBloqueada = Company::create([
+            'name' => 'Empresa Bloqueada',
+            'email' => 'contato@bloqueada.com',
+            'trial_start' => now()->subDays(10),
+            'trial_end' => now()->subDays(5),
+            'is_active' => false,
+            'paid_until' => null,
+        ]);
+
+        // Usuários admin global
         User::factory()->create([
             'name' => 'Administrador',
             'email' => 'admin@empresa.com',
             'password' => bcrypt('admin123'),
             'role' => 'admin',
+            'company_id' => null,
         ]);
 
+        // Usuários de cada empresa
         User::factory()->create([
-            'name' => 'Estoquista',
-            'email' => 'estoquista@empresa.com',
-            'password' => bcrypt('estoque123'),
-            'role' => 'estoquista',
+            'name' => 'Usuário Ativo',
+            'email' => 'ativo@empresa.com',
+            'password' => bcrypt('123456'),
+            'role' => 'user',
+            'company_id' => $empresaAtiva->id,
+        ]);
+        User::factory()->create([
+            'name' => 'Usuário Expirado',
+            'email' => 'expirado@empresa.com',
+            'password' => bcrypt('123456'),
+            'role' => 'user',
+            'company_id' => $empresaExpirada->id,
+        ]);
+        User::factory()->create([
+            'name' => 'Usuário Paga',
+            'email' => 'paga@empresa.com',
+            'password' => bcrypt('123456'),
+            'role' => 'user',
+            'company_id' => $empresaPaga->id,
+        ]);
+        User::factory()->create([
+            'name' => 'Usuário Bloqueado',
+            'email' => 'bloqueado@empresa.com',
+            'password' => bcrypt('123456'),
+            'role' => 'user',
+            'company_id' => $empresaBloqueada->id,
         ]);
 
-        // Funcionários
+        // Funcionários da Empresa Ativa
         Employee::create([
             'name' => 'João Silva',
             'cpf' => '123.456.789-00',
-            'email' => 'joao@empresa.com',
+            'email' => 'joao@ativa.com',
             'phone' => '(11) 99999-9999',
             'role' => 'Gerente',
             'admission_date' => Carbon::now()->subYear(),
             'username' => 'joao.silva',
             'password' => bcrypt('123456'),
             'permission_level' => 'administrador',
+            'company_id' => $empresaAtiva->id,
         ]);
 
         Employee::create([
             'name' => 'Maria Santos',
             'cpf' => '987.654.321-00',
-            'email' => 'maria@empresa.com',
+            'email' => 'maria@ativa.com',
             'phone' => '(11) 88888-8888',
             'role' => 'Estoquista',
             'admission_date' => Carbon::now()->subMonths(6),
             'username' => 'maria.santos',
             'password' => bcrypt('123456'),
             'permission_level' => 'operador',
+            'company_id' => $empresaAtiva->id,
         ]);
 
-        // Categorias
-        $categorias = [
-            ['name' => 'Eletrônicos', 'code' => 'ELET', 'description' => 'Produtos eletrônicos'],
-            ['name' => 'Informática', 'code' => 'INFO', 'description' => 'Produtos de informática'],
-            ['name' => 'Escritório', 'code' => 'ESCR', 'description' => 'Material de escritório'],
-            ['name' => 'Limpeza', 'code' => 'LIMP', 'description' => 'Produtos de limpeza'],
-            ['name' => 'Alimentação', 'code' => 'ALIM', 'description' => 'Produtos alimentícios'],
+        // Funcionários da Empresa Paga
+        Employee::create([
+            'name' => 'Pedro Costa',
+            'cpf' => '111.222.333-44',
+            'email' => 'pedro@paga.com',
+            'phone' => '(11) 77777-7777',
+            'role' => 'Vendedor',
+            'admission_date' => Carbon::now()->subMonths(3),
+            'username' => 'pedro.costa',
+            'password' => bcrypt('123456'),
+            'permission_level' => 'operador',
+            'company_id' => $empresaPaga->id,
+        ]);
+
+        // Categorias da Empresa Ativa
+        $categoriasAtiva = [
+            ['name' => 'Eletrônicos', 'code' => 'ELET', 'description' => 'Produtos eletrônicos', 'company_id' => $empresaAtiva->id],
+            ['name' => 'Informática', 'code' => 'INFO', 'description' => 'Produtos de informática', 'company_id' => $empresaAtiva->id],
+            ['name' => 'Escritório', 'code' => 'ESCR', 'description' => 'Material de escritório', 'company_id' => $empresaAtiva->id],
+            ['name' => 'Limpeza', 'code' => 'LIMP', 'description' => 'Produtos de limpeza', 'company_id' => $empresaAtiva->id],
+            ['name' => 'Alimentação', 'code' => 'ALIM', 'description' => 'Produtos alimentícios', 'company_id' => $empresaAtiva->id],
         ];
 
-        foreach ($categorias as $cat) {
+        foreach ($categoriasAtiva as $cat) {
             Category::create($cat);
         }
 
-        // Produtos
-        $produtos = [
-            ['name' => 'Notebook Dell', 'internal_code' => 'NB001', 'category_id' => 2, 'unit' => 'un', 'cost_price' => 2500.00, 'sale_price' => 3200.00, 'min_stock' => 3],
-            ['name' => 'Mouse Wireless', 'internal_code' => 'MS001', 'category_id' => 2, 'unit' => 'un', 'cost_price' => 25.00, 'sale_price' => 45.00, 'min_stock' => 15],
-            ['name' => 'Teclado Mecânico', 'internal_code' => 'TC001', 'category_id' => 2, 'unit' => 'un', 'cost_price' => 120.00, 'sale_price' => 180.00, 'min_stock' => 8],
-            ['name' => 'Papel A4', 'internal_code' => 'PP001', 'category_id' => 3, 'unit' => 'pacote', 'cost_price' => 15.00, 'sale_price' => 25.00, 'min_stock' => 20],
-            ['name' => 'Caneta Bic', 'internal_code' => 'CN001', 'category_id' => 3, 'unit' => 'un', 'cost_price' => 1.50, 'sale_price' => 3.00, 'min_stock' => 50],
-            ['name' => 'Detergente', 'internal_code' => 'DT001', 'category_id' => 4, 'unit' => 'l', 'cost_price' => 8.00, 'sale_price' => 12.00, 'min_stock' => 10],
-            ['name' => 'Café em Pó', 'internal_code' => 'CF001', 'category_id' => 5, 'unit' => 'kg', 'cost_price' => 12.00, 'sale_price' => 18.00, 'min_stock' => 5],
+        // Categorias da Empresa Paga
+        $categoriasPaga = [
+            ['name' => 'Vestuário', 'code' => 'VEST', 'description' => 'Roupas e acessórios', 'company_id' => $empresaPaga->id],
+            ['name' => 'Calçados', 'code' => 'CALC', 'description' => 'Sapatos e tênis', 'company_id' => $empresaPaga->id],
+            ['name' => 'Bolsas', 'code' => 'BOLS', 'description' => 'Bolsas e mochilas', 'company_id' => $empresaPaga->id],
         ];
 
-        foreach ($produtos as $prod) {
+        foreach ($categoriasPaga as $cat) {
+            Category::create($cat);
+        }
+
+        // Produtos da Empresa Ativa
+        $produtosAtiva = [
+            ['name' => 'Notebook Dell', 'internal_code' => 'NB001', 'category_id' => 2, 'unit' => 'un', 'cost_price' => 2500.00, 'sale_price' => 3200.00, 'min_stock' => 3, 'company_id' => $empresaAtiva->id],
+            ['name' => 'Mouse Wireless', 'internal_code' => 'MS001', 'category_id' => 2, 'unit' => 'un', 'cost_price' => 25.00, 'sale_price' => 45.00, 'min_stock' => 15, 'company_id' => $empresaAtiva->id],
+            ['name' => 'Teclado Mecânico', 'internal_code' => 'TC001', 'category_id' => 2, 'unit' => 'un', 'cost_price' => 120.00, 'sale_price' => 180.00, 'min_stock' => 8, 'company_id' => $empresaAtiva->id],
+            ['name' => 'Papel A4', 'internal_code' => 'PP001', 'category_id' => 3, 'unit' => 'pacote', 'cost_price' => 15.00, 'sale_price' => 25.00, 'min_stock' => 20, 'company_id' => $empresaAtiva->id],
+            ['name' => 'Caneta Bic', 'internal_code' => 'CN001', 'category_id' => 3, 'unit' => 'un', 'cost_price' => 1.50, 'sale_price' => 3.00, 'min_stock' => 50, 'company_id' => $empresaAtiva->id],
+            ['name' => 'Detergente', 'internal_code' => 'DT001', 'category_id' => 4, 'unit' => 'l', 'cost_price' => 8.00, 'sale_price' => 12.00, 'min_stock' => 10, 'company_id' => $empresaAtiva->id],
+            ['name' => 'Café em Pó', 'internal_code' => 'CF001', 'category_id' => 5, 'unit' => 'kg', 'cost_price' => 12.00, 'sale_price' => 18.00, 'min_stock' => 5, 'company_id' => $empresaAtiva->id],
+        ];
+
+        foreach ($produtosAtiva as $prod) {
             Product::create($prod);
         }
 
-        // Movimentações de estoque
-        $movimentacoes = [
-            ['product_id' => 1, 'user_id' => 1, 'type' => 'entrada', 'quantity' => 5, 'date' => Carbon::now()->subDays(5), 'notes' => 'Compra inicial'],
-            ['product_id' => 1, 'user_id' => 1, 'type' => 'saida', 'quantity' => 2, 'date' => Carbon::now()->subDays(3), 'notes' => 'Venda'],
-            ['product_id' => 2, 'user_id' => 1, 'type' => 'entrada', 'quantity' => 20, 'date' => Carbon::now()->subDays(10), 'notes' => 'Compra'],
-            ['product_id' => 2, 'user_id' => 1, 'type' => 'saida', 'quantity' => 5, 'date' => Carbon::now()->subDays(2), 'notes' => 'Venda'],
-            ['product_id' => 3, 'user_id' => 1, 'type' => 'entrada', 'quantity' => 10, 'date' => Carbon::now()->subDays(7), 'notes' => 'Compra'],
-            ['product_id' => 4, 'user_id' => 1, 'type' => 'entrada', 'quantity' => 30, 'date' => Carbon::now()->subDays(15), 'notes' => 'Compra'],
-            ['product_id' => 4, 'user_id' => 1, 'type' => 'saida', 'quantity' => 10, 'date' => Carbon::now()->subDays(1), 'notes' => 'Uso interno'],
+        // Produtos da Empresa Paga
+        $produtosPaga = [
+            ['name' => 'Camiseta Básica', 'internal_code' => 'CAM001', 'category_id' => 6, 'unit' => 'un', 'cost_price' => 15.00, 'sale_price' => 35.00, 'min_stock' => 20, 'company_id' => $empresaPaga->id],
+            ['name' => 'Tênis Esportivo', 'internal_code' => 'TEN001', 'category_id' => 7, 'unit' => 'un', 'cost_price' => 80.00, 'sale_price' => 150.00, 'min_stock' => 10, 'company_id' => $empresaPaga->id],
+            ['name' => 'Bolsa Feminina', 'internal_code' => 'BOL001', 'category_id' => 8, 'unit' => 'un', 'cost_price' => 45.00, 'sale_price' => 89.00, 'min_stock' => 8, 'company_id' => $empresaPaga->id],
         ];
 
-        foreach ($movimentacoes as $mov) {
+        foreach ($produtosPaga as $prod) {
+            Product::create($prod);
+        }
+
+        // Movimentações de estoque da Empresa Ativa
+        $movimentacoesAtiva = [
+            ['product_id' => 1, 'user_id' => 2, 'type' => 'entrada', 'quantity' => 5, 'date' => Carbon::now()->subDays(5), 'notes' => 'Compra inicial', 'movement_reason' => 'compra'],
+            ['product_id' => 1, 'user_id' => 2, 'type' => 'saida', 'quantity' => 2, 'date' => Carbon::now()->subDays(3), 'notes' => 'Venda', 'movement_reason' => 'venda'],
+            ['product_id' => 2, 'user_id' => 2, 'type' => 'entrada', 'quantity' => 20, 'date' => Carbon::now()->subDays(10), 'notes' => 'Compra', 'movement_reason' => 'compra'],
+            ['product_id' => 2, 'user_id' => 2, 'type' => 'saida', 'quantity' => 5, 'date' => Carbon::now()->subDays(2), 'notes' => 'Venda', 'movement_reason' => 'venda'],
+            ['product_id' => 3, 'user_id' => 2, 'type' => 'entrada', 'quantity' => 10, 'date' => Carbon::now()->subDays(7), 'notes' => 'Compra', 'movement_reason' => 'compra'],
+            ['product_id' => 4, 'user_id' => 2, 'type' => 'entrada', 'quantity' => 30, 'date' => Carbon::now()->subDays(15), 'notes' => 'Compra', 'movement_reason' => 'compra'],
+            ['product_id' => 4, 'user_id' => 2, 'type' => 'saida', 'quantity' => 10, 'date' => Carbon::now()->subDays(1), 'notes' => 'Uso interno', 'movement_reason' => 'ajuste'],
+        ];
+
+        foreach ($movimentacoesAtiva as $mov) {
             StockMovement::create($mov);
         }
 
-        // Contas a pagar
-        $contasPagar = [
-            ['descricao' => 'Fornecedor Eletrônicos Ltda', 'pessoa' => 'Fornecedor Eletrônicos', 'categoria' => 'Fornecedores', 'valor' => 5000.00, 'data_vencimento' => Carbon::now()->addDays(5), 'status' => 'pendente', 'forma_pagamento' => 'PIX', 'criado_por' => 1],
-            ['descricao' => 'Aluguel Escritório', 'pessoa' => 'Imobiliária Central', 'categoria' => 'Despesas Fixas', 'valor' => 2500.00, 'data_vencimento' => Carbon::now()->addDays(3), 'status' => 'pendente', 'forma_pagamento' => 'Transferência', 'criado_por' => 1],
-            ['descricao' => 'Energia Elétrica', 'pessoa' => 'Companhia Energética', 'categoria' => 'Serviços Públicos', 'valor' => 800.00, 'data_vencimento' => Carbon::now()->subDays(2), 'status' => 'pago', 'data_pagamento' => Carbon::now()->subDays(1), 'forma_pagamento' => 'Boleto', 'criado_por' => 1],
-            ['descricao' => 'Internet', 'pessoa' => 'Provedor Net', 'categoria' => 'Serviços Públicos', 'valor' => 150.00, 'data_vencimento' => Carbon::now()->addDays(10), 'status' => 'pendente', 'forma_pagamento' => 'Cartão', 'criado_por' => 1],
+        // Movimentações de estoque da Empresa Paga
+        $movimentacoesPaga = [
+            ['product_id' => 8, 'user_id' => 4, 'type' => 'entrada', 'quantity' => 25, 'date' => Carbon::now()->subDays(3), 'notes' => 'Compra inicial', 'movement_reason' => 'compra'],
+            ['product_id' => 9, 'user_id' => 4, 'type' => 'entrada', 'quantity' => 15, 'date' => Carbon::now()->subDays(2), 'notes' => 'Compra', 'movement_reason' => 'compra'],
+            ['product_id' => 10, 'user_id' => 4, 'type' => 'entrada', 'quantity' => 12, 'date' => Carbon::now()->subDays(1), 'notes' => 'Compra', 'movement_reason' => 'compra'],
         ];
 
-        foreach ($contasPagar as $conta) {
+        foreach ($movimentacoesPaga as $mov) {
+            StockMovement::create($mov);
+        }
+
+        // Contas a pagar da Empresa Ativa
+        $contasPagarAtiva = [
+            ['descricao' => 'Fornecedor Eletrônicos Ltda', 'pessoa' => 'Fornecedor Eletrônicos', 'categoria' => 'Fornecedores', 'valor' => 5000.00, 'data_vencimento' => Carbon::now()->addDays(5), 'status' => 'pendente', 'forma_pagamento' => 'PIX', 'criado_por' => 1, 'company_id' => $empresaAtiva->id],
+            ['descricao' => 'Aluguel Escritório', 'pessoa' => 'Imobiliária Central', 'categoria' => 'Despesas Fixas', 'valor' => 2500.00, 'data_vencimento' => Carbon::now()->addDays(3), 'status' => 'pendente', 'forma_pagamento' => 'Transferência', 'criado_por' => 1, 'company_id' => $empresaAtiva->id],
+            ['descricao' => 'Energia Elétrica', 'pessoa' => 'Companhia Energética', 'categoria' => 'Serviços Públicos', 'valor' => 800.00, 'data_vencimento' => Carbon::now()->subDays(2), 'status' => 'pago', 'data_pagamento' => Carbon::now()->subDays(1), 'forma_pagamento' => 'Boleto', 'criado_por' => 1, 'company_id' => $empresaAtiva->id],
+            ['descricao' => 'Internet', 'pessoa' => 'Provedor Net', 'categoria' => 'Serviços Públicos', 'valor' => 150.00, 'data_vencimento' => Carbon::now()->addDays(10), 'status' => 'pendente', 'forma_pagamento' => 'Cartão', 'criado_por' => 1, 'company_id' => $empresaAtiva->id],
+        ];
+
+        foreach ($contasPagarAtiva as $conta) {
             Payable::create($conta);
         }
 
-        // Contas a receber
-        $contasReceber = [
-            ['descricao' => 'Venda Cliente A', 'pessoa' => 'Cliente A Ltda', 'categoria' => 'Vendas', 'valor' => 3200.00, 'data_vencimento' => Carbon::now()->addDays(7), 'status' => 'pendente', 'forma_recebimento' => 'PIX', 'criado_por' => 1],
-            ['descricao' => 'Venda Cliente B', 'pessoa' => 'Cliente B S/A', 'categoria' => 'Vendas', 'valor' => 1800.00, 'data_vencimento' => Carbon::now()->subDays(1), 'status' => 'recebido', 'data_recebimento' => Carbon::now(), 'forma_recebimento' => 'Transferência', 'criado_por' => 1],
-            ['descricao' => 'Serviço Consultoria', 'pessoa' => 'Empresa C', 'categoria' => 'Serviços', 'valor' => 2500.00, 'data_vencimento' => Carbon::now()->addDays(15), 'status' => 'pendente', 'forma_recebimento' => 'Boleto', 'criado_por' => 1],
-            ['descricao' => 'Venda Cliente D', 'pessoa' => 'Cliente D', 'categoria' => 'Vendas', 'valor' => 900.00, 'data_vencimento' => Carbon::now()->addDays(2), 'status' => 'pendente', 'forma_recebimento' => 'PIX', 'criado_por' => 1],
+        // Contas a pagar da Empresa Paga
+        $contasPagarPaga = [
+            ['descricao' => 'Fornecedor de Roupas', 'pessoa' => 'Fornecedor Fashion', 'categoria' => 'Fornecedores', 'valor' => 3000.00, 'data_vencimento' => Carbon::now()->addDays(7), 'status' => 'pendente', 'forma_pagamento' => 'PIX', 'criado_por' => 3, 'company_id' => $empresaPaga->id],
+            ['descricao' => 'Aluguel Loja', 'pessoa' => 'Shopping Center', 'categoria' => 'Despesas Fixas', 'valor' => 4000.00, 'data_vencimento' => Carbon::now()->addDays(2), 'status' => 'pendente', 'forma_pagamento' => 'Transferência', 'criado_por' => 3, 'company_id' => $empresaPaga->id],
         ];
 
-        foreach ($contasReceber as $conta) {
+        foreach ($contasPagarPaga as $conta) {
+            Payable::create($conta);
+        }
+
+        // Contas a receber da Empresa Ativa
+        $contasReceberAtiva = [
+            ['descricao' => 'Venda Cliente A', 'pessoa' => 'Cliente A Ltda', 'categoria' => 'Vendas', 'valor' => 3200.00, 'data_vencimento' => Carbon::now()->addDays(7), 'status' => 'pendente', 'forma_recebimento' => 'PIX', 'criado_por' => 1, 'company_id' => $empresaAtiva->id],
+            ['descricao' => 'Venda Cliente B', 'pessoa' => 'Cliente B S/A', 'categoria' => 'Vendas', 'valor' => 1800.00, 'data_vencimento' => Carbon::now()->subDays(1), 'status' => 'recebido', 'data_recebimento' => Carbon::now(), 'forma_recebimento' => 'Transferência', 'criado_por' => 1, 'company_id' => $empresaAtiva->id],
+            ['descricao' => 'Serviço Consultoria', 'pessoa' => 'Empresa C', 'categoria' => 'Serviços', 'valor' => 2500.00, 'data_vencimento' => Carbon::now()->addDays(15), 'status' => 'pendente', 'forma_recebimento' => 'Boleto', 'criado_por' => 1, 'company_id' => $empresaAtiva->id],
+            ['descricao' => 'Venda Cliente D', 'pessoa' => 'Cliente D', 'categoria' => 'Vendas', 'valor' => 900.00, 'data_vencimento' => Carbon::now()->addDays(2), 'status' => 'pendente', 'forma_recebimento' => 'PIX', 'criado_por' => 1, 'company_id' => $empresaAtiva->id],
+        ];
+
+        foreach ($contasReceberAtiva as $conta) {
             Receivable::create($conta);
         }
 
-        // TimeClocks (ponto)
+        // Contas a receber da Empresa Paga
+        $contasReceberPaga = [
+            ['descricao' => 'Venda Loja Shopping', 'pessoa' => 'Shopping Center', 'categoria' => 'Vendas', 'valor' => 2500.00, 'data_vencimento' => Carbon::now()->addDays(5), 'status' => 'pendente', 'forma_recebimento' => 'PIX', 'criado_por' => 3, 'company_id' => $empresaPaga->id],
+            ['descricao' => 'Venda Cliente VIP', 'pessoa' => 'Cliente VIP', 'categoria' => 'Vendas', 'valor' => 1200.00, 'data_vencimento' => Carbon::now()->subDays(2), 'status' => 'recebido', 'data_recebimento' => Carbon::now()->subDays(1), 'forma_recebimento' => 'Cartão', 'criado_por' => 3, 'company_id' => $empresaPaga->id],
+        ];
+
+        foreach ($contasReceberPaga as $conta) {
+            Receivable::create($conta);
+        }
+
+        // TimeClocks (ponto) da Empresa Ativa
         TimeClock::create([
             'employee_id' => 1,
             'data' => now()->subDays(1)->toDateString(),
@@ -150,6 +284,17 @@ class DatabaseSeeder extends Seeder
             'hora_intervalo_fim' => '13:30',
             'hora_saida' => '18:00',
             'observacao' => 'Chegou atrasado',
+        ]);
+
+        // TimeClocks (ponto) da Empresa Paga
+        TimeClock::create([
+            'employee_id' => 3,
+            'data' => now()->subDays(1)->toDateString(),
+            'hora_entrada' => '08:30',
+            'hora_intervalo_inicio' => '12:00',
+            'hora_intervalo_fim' => '13:00',
+            'hora_saida' => '17:30',
+            'observacao' => 'Dia normal',
         ]);
 
         // Payrolls (folha de pagamento)

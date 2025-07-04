@@ -18,15 +18,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
-                <span class="bg-gray-800 p-2 rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="white" class="w-7 h-7">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5V6.375A2.625 2.625 0 015.625 3.75h12.75A2.625 2.625 0 0121 6.375V7.5M3 7.5v10.125A2.625 2.625 0 005.625 20.25h12.75A2.625 2.625 0 0021 17.625V7.5M3 7.5h18M7.5 11.25h9" />
-                    </svg>
-                </span>
-                <span class="text-xl font-bold text-gray-800 tracking-tight">BSEstoque</span>
+                <!-- Logo na navbar -->
+                <img src="/imagens/logo.png" alt="Logo" class="h-12 hidden md:block">
+                <img src="/imagens/logo_fechado.png" alt="Logo Mobile" class="h-9 md:hidden">
             </div>
             <div class="flex items-center gap-4">
-                <span class="text-gray-700 font-medium hidden sm:block">Olá, <span class="font-semibold">Usuário</span></span>
+                <span class="text-gray-700 font-medium hidden sm:block">Olá, <span class="font-semibold">{{ Auth::user()->name }}</span></span>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-800 text-white rounded hover:bg-gray-900 transition text-sm font-medium">
@@ -50,86 +47,156 @@
             </a>
 
             <!-- Seção de Estoque -->
+            @canModule('products')
             <div class="pt-4">
                 <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Estoque</h3>
+                @can('view-products')
                 <a href="/products" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition {{ request()->routeIs('products.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-700 hover:bg-gray-100' }}">
                     <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V7a2 2 0 00-2-2H6a2 2 0 00-2 2v6m16 0v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6m16 0H4"/></svg>
                     Produtos
                 </a>
+                @endcan
+                @can('view-categories')
                 <a href="/categories" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition {{ request()->routeIs('categories.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-700 hover:bg-gray-100' }}">
                     <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
                     Categorias
                 </a>
+                @endcan
+                @can('view-movements')
                 <a href="/stock_movements" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition {{ request()->routeIs('stock_movements.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-700 hover:bg-gray-100' }}">
                     <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1"/></svg>
                     Movimentações
                 </a>
+                @endcan
+                @can('view-suppliers')
+                <a href="/suppliers" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition {{ request()->routeIs('suppliers.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    Fornecedores
+                </a>
+                @endcan
             </div>
+            @endcanModule
 
             <!-- Seção Financeira -->
+            @canModule('finance')
             <div class="pt-4">
                 <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Financeiro</h3>
+                @can('view-payables')
                 <a href="/payables" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition {{ request()->routeIs('payables.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-700 hover:bg-gray-100' }}">
                     <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
                     Contas a Pagar
                 </a>
+                @endcan
+                @can('view-receivables')
                 <a href="/receivables" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition {{ request()->routeIs('receivables.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-700 hover:bg-gray-100' }}">
                     <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
                     Contas a Receber
                 </a>
+                @endcan
+                @can('financial-reports')
                 <a href="/financial-reports" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition {{ request()->routeIs('financial-reports.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-700 hover:bg-gray-100' }}">
                     <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                     Relatórios Financeiros
                 </a>
+                @endcan
             </div>
+            @endcanModule
 
             <!-- Seção Administrativa -->
             <div class="pt-4">
                 <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Administrativo</h3>
+                @can('view-employees')
                 <a href="/employees" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition {{ request()->routeIs('employees.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-700 hover:bg-gray-100' }}">
                     <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     Funcionários
                 </a>
+                @endcan
+                @can('view-reports')
                 <a href="/reports" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition {{ request()->routeIs('reports.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-700 hover:bg-gray-100' }}">
                     <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 17v-2a4 4 0 014-4h10a4 4 0 014 4v2M16 3.13a4 4 0 010 7.75M8 3.13a4 4 0 000 7.75"/></svg>
                     Relatórios de Estoque
                 </a>
-                <!-- Submenu RH / Departamento Pessoal -->
-                <button type="button" id="rhMenuBtn" class="flex items-center w-full gap-3 px-3 py-2 rounded-lg font-medium transition text-gray-700 hover:bg-gray-100 focus:outline-none" onclick="toggleRHMenu()">
-                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-7a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 10-8 0 4 4 0 008 0z" />
-                    </svg>
-                    RH / Departamento Pessoal
-                    <svg id="rhMenuChevron" class="w-4 h-4 ml-auto transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                </button>
-                <div id="rhSubMenu" class="space-y-1 pl-8 py-1 hidden">
-                    <a href="/timeclocks" class="flex items-center gap-2 px-2 py-1 rounded font-medium transition text-sm {{ request()->routeIs('timeclocks.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-600 hover:bg-gray-100' }}">
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
-                        Ponto
-                    </a>
-                    <a href="/payrolls" class="flex items-center gap-2 px-2 py-1 rounded font-medium transition text-sm {{ request()->routeIs('payrolls.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-600 hover:bg-gray-100' }}">
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
-                        Folha de Pagamento
-                    </a>
-                    <a href="/vacations" class="flex items-center gap-2 px-2 py-1 rounded font-medium transition text-sm {{ request()->routeIs('vacations.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-600 hover:bg-gray-100' }}">
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 17l4 4 4-4m-4-5v9"/></svg>
-                        Férias
-                    </a>
-                    <a href="/leaves" class="flex items-center gap-2 px-2 py-1 rounded font-medium transition text-sm {{ request()->routeIs('leaves.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-600 hover:bg-gray-100' }}">
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m-6 0a2 2 0 002 2h2a2 2 0 002-2"/></svg>
-                        Licenças
-                    </a>
-                    <a href="/benefits" class="flex items-center gap-2 px-2 py-1 rounded font-medium transition text-sm {{ request()->routeIs('benefits.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-600 hover:bg-gray-100' }}">
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
-                        Benefícios
-                    </a>
-                    <a href="/payslips" class="flex items-center gap-2 px-2 py-1 rounded font-medium transition text-sm {{ request()->routeIs('payslips.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-600 hover:bg-gray-100' }}">
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m-6 0a2 2 0 002 2h2a2 2 0 002-2"/></svg>
-                        Holerites
-                    </a>
-                </div>
+                @endcan
+                @can('manage-roles')
+                <a href="/roles" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition {{ request()->routeIs('roles.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    Papéis e Permissões
+                </a>
+                @endcan
+                @can('view-users')
+                <a href="/users" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition {{ request()->routeIs('users.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/></svg>
+                    Usuários
+                </a>
+                @endcan
+                @if(Auth::user() && Auth::user()->isAdmin())
+                <a href="/admin/companies" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition {{ request()->is('admin/companies*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-7a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 10-8 0 4 4 0 008 0z"/></svg>
+                    Empresas
+                </a>
+                @endif
             </div>
-        </nav>
+            <!-- Submenu RH / Departamento Pessoal -->
+            @canModule('hr')
+            <button type="button" id="rhMenuBtn" class="flex items-center w-full gap-3 px-3 py-2 rounded-lg font-medium transition text-gray-700 hover:bg-gray-100 focus:outline-none" onclick="toggleRHMenu()">
+                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-7a4 4 0 11-8 0 4 4 0 018 0zm6 4a4 4 0 10-8 0 4 4 0 008 0z" />
+                </svg>
+                RH / Departamento Pessoal
+                <svg id="rhMenuChevron" class="w-4 h-4 ml-auto transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div id="rhSubMenu" class="space-y-1 pl-8 py-1 hidden">
+                @can('time-clock')
+                <a href="/timeclocks" class="flex items-center gap-2 px-2 py-1 rounded font-medium transition text-sm {{ request()->routeIs('timeclocks.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/></svg>
+                    Ponto
+                </a>
+                @endcan
+                @can('payroll')
+                <a href="/payrolls" class="flex items-center gap-2 px-2 py-1 rounded font-medium transition text-sm {{ request()->routeIs('payrolls.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
+                    Folha de Pagamento
+                </a>
+                @endcan
+                @can('vacations')
+                <a href="/vacations" class="flex items-center gap-2 px-2 py-1 rounded font-medium transition text-sm {{ request()->routeIs('vacations.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 17l4 4 4-4m-4-5v9"/></svg>
+                    Férias
+                </a>
+                @endcan
+                @can('leaves')
+                <a href="/leaves" class="flex items-center gap-2 px-2 py-1 rounded font-medium transition text-sm {{ request()->routeIs('leaves.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m-6 0a2 2 0 002 2h2a2 2 0 002-2"/></svg>
+                    Licenças
+                </a>
+                @endcan
+                @can('benefits')
+                <a href="/benefits" class="flex items-center gap-2 px-2 py-1 rounded font-medium transition text-sm {{ request()->routeIs('benefits.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
+                    Benefícios
+                </a>
+                @endcan
+                <a href="/payslips" class="flex items-center gap-2 px-2 py-1 rounded font-medium transition text-sm {{ request()->routeIs('payslips.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m-6 0a2 2 0 002 2h2a2 2 0 002-2"/></svg>
+                    Holerites
+                </a>
+            </div>
+            @endcanModule
+
+            <!-- Seção Frente de Caixa -->
+            <div class="pt-4">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Frente de Caixa</h3>
+                <a href="/caixa" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition {{ request()->routeIs('caixa.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>
+                    Caixa
+                </a>
+                <a href="/pdv/full" target="_blank" class="flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition {{ request()->routeIs('pdv.*') ? 'bg-gray-100 text-gray-900 font-bold' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M18 10h.01"/></svg>
+                    PDV
+                </a>
+            </div>
+
+        </div>
     </aside>
 
     <!-- Conteúdo principal -->

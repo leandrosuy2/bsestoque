@@ -3,15 +3,23 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Category;
 
 class CategoryController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('company.access');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $categories = \App\Models\Category::paginate(10);
+        $user = Auth::user();
+        $categories = Category::where('company_id', $user->company_id)->paginate(10);
         return view('categories.index', compact('categories'));
     }
 
@@ -28,12 +36,15 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'nullable|string|max:100|unique:categories,code',
             'description' => 'nullable|string',
         ]);
-        \App\Models\Category::create($validated);
+
+        $validated['company_id'] = $user->company_id;
+        Category::create($validated);
         return redirect()->route('categories.index')->with('success', 'Categoria cadastrada com sucesso!');
     }
 
@@ -50,7 +61,8 @@ class CategoryController extends Controller
      */
     public function edit($id)
     {
-        $category = \App\Models\Category::findOrFail($id);
+        $user = Auth::user();
+        $category = Category::where('company_id', $user->company_id)->findOrFail($id);
         return view('categories.edit', compact('category'));
     }
 
@@ -59,7 +71,9 @@ class CategoryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $category = \App\Models\Category::findOrFail($id);
+        $user = Auth::user();
+        $category = Category::where('company_id', $user->company_id)->findOrFail($id);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'nullable|string|max:100|unique:categories,code,' . $category->id,
@@ -74,7 +88,8 @@ class CategoryController extends Controller
      */
     public function destroy($id)
     {
-        $category = \App\Models\Category::findOrFail($id);
+        $user = Auth::user();
+        $category = Category::where('company_id', $user->company_id)->findOrFail($id);
 
         if ($category->products()->count() > 0) {
             return redirect()->route('categories.index')

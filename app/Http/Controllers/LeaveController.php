@@ -5,15 +5,24 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Leave;
 use App\Models\Employee;
+use Illuminate\Support\Facades\Auth;
 
 class LeaveController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('company.access');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $leaves = Leave::all();
+        $user = Auth::user();
+        $leaves = Leave::whereHas('employee', function($query) use ($user) {
+            $query->where('company_id', $user->company_id);
+        })->with('employee')->orderBy('data_inicio', 'desc')->paginate(15);
         return view('leaves.index', compact('leaves'));
     }
 
@@ -22,7 +31,8 @@ class LeaveController extends Controller
      */
     public function create()
     {
-        $employees = Employee::all();
+        $user = Auth::user();
+        $employees = Employee::where('company_id', $user->company_id)->orderBy('name')->get();
         return view('leaves.create', compact('employees'));
     }
 

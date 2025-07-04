@@ -5,15 +5,24 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\TimeClock;
 use App\Models\Employee;
+use Illuminate\Support\Facades\Auth;
 
 class TimeClockController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('company.access');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $timeclocks = TimeClock::all();
+        $user = Auth::user();
+        $timeclocks = TimeClock::whereHas('employee', function($query) use ($user) {
+            $query->where('company_id', $user->company_id);
+        })->with('employee')->orderBy('data', 'desc')->paginate(15);
         return view('timeclocks.index', compact('timeclocks'));
     }
 
@@ -22,7 +31,8 @@ class TimeClockController extends Controller
      */
     public function create()
     {
-        $employees = Employee::all();
+        $user = Auth::user();
+        $employees = Employee::where('company_id', $user->company_id)->orderBy('name')->get();
         return view('timeclocks.create', compact('employees'));
     }
 

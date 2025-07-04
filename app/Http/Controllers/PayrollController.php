@@ -4,15 +4,25 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Payroll;
+use App\Models\Employee;
+use Illuminate\Support\Facades\Auth;
 
 class PayrollController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('company.access');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $payrolls = Payroll::all();
+        $user = Auth::user();
+        $payrolls = Payroll::whereHas('employee', function($query) use ($user) {
+            $query->where('company_id', $user->company_id);
+        })->with('employee')->orderBy('competencia', 'desc')->paginate(15);
         return view('payrolls.index', compact('payrolls'));
     }
 
@@ -21,7 +31,9 @@ class PayrollController extends Controller
      */
     public function create()
     {
-        return view('payrolls.create');
+        $user = Auth::user();
+        $employees = Employee::where('company_id', $user->company_id)->orderBy('name')->get();
+        return view('payrolls.create', compact('employees'));
     }
 
     /**

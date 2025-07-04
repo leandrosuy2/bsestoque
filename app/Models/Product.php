@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BelongsToCompany;
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToCompany;
 
     protected $fillable = [
         'name',
@@ -18,10 +19,16 @@ class Product extends Model
         'cost_price',
         'sale_price',
         'min_stock',
+        'company_id',
     ];
 
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function stockMovements()
+    {
+        return $this->hasMany(StockMovement::class);
     }
 }

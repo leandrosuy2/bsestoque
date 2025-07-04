@@ -4,15 +4,25 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Benefit;
+use App\Models\Employee;
+use Illuminate\Support\Facades\Auth;
 
 class BenefitController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('company.access');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $benefits = Benefit::all();
+        $user = Auth::user();
+        $benefits = Benefit::whereHas('employee', function($query) use ($user) {
+            $query->where('company_id', $user->company_id);
+        })->with('employee')->orderBy('created_at', 'desc')->paginate(15);
         return view('benefits.index', compact('benefits'));
     }
 
@@ -21,7 +31,9 @@ class BenefitController extends Controller
      */
     public function create()
     {
-        return view('benefits.create');
+        $user = Auth::user();
+        $employees = Employee::where('company_id', $user->company_id)->orderBy('name')->get();
+        return view('benefits.create', compact('employees'));
     }
 
     /**

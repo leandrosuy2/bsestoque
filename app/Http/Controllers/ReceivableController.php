@@ -9,9 +9,15 @@ use Illuminate\Support\Facades\Auth;
 
 class ReceivableController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('company.access');
+    }
+
     public function index(Request $request)
     {
-        $query = Receivable::with('criador');
+        $user = Auth::user();
+        $query = Receivable::where('company_id', $user->company_id)->with('criador');
 
         // Filtros
         if ($request->filled('status')) {
@@ -33,21 +39,23 @@ class ReceivableController extends Controller
         $receivables = $query->orderBy('data_vencimento')->paginate(15);
 
         // Estatísticas
-        $totalPendente = Receivable::where('status', 'pendente')->sum('valor');
-        $totalRecebido = Receivable::where('status', 'recebido')->sum('valor');
-        $totalAtrasado = Receivable::where('status', 'atrasado')->sum('valor');
+        $totalPendente = Receivable::where('company_id', $user->company_id)->where('status', 'pendente')->sum('valor');
+        $totalRecebido = Receivable::where('company_id', $user->company_id)->where('status', 'recebido')->sum('valor');
+        $totalAtrasado = Receivable::where('company_id', $user->company_id)->where('status', 'atrasado')->sum('valor');
 
         return view('receivables.index', compact('receivables', 'totalPendente', 'totalRecebido', 'totalAtrasado', 'request'));
     }
 
     public function create()
     {
-        $employees = Employee::where('active', true)->get();
+        $user = Auth::user();
+        $employees = Employee::where('company_id', $user->company_id)->where('active', true)->get();
         return view('receivables.create', compact('employees'));
     }
 
     public function store(Request $request)
     {
+        $user = Auth::user();
         $validated = $request->validate([
             'descricao' => 'required|string|max:255',
             'pessoa' => 'required|string|max:255',
@@ -61,6 +69,7 @@ class ReceivableController extends Controller
 
         $validated['criado_por'] = Auth::id();
         $validated['status'] = 'pendente';
+        $validated['company_id'] = $user->company_id;
 
         Receivable::create($validated);
 
@@ -74,12 +83,26 @@ class ReceivableController extends Controller
 
     public function edit(Receivable $receivable)
     {
-        $employees = Employee::where('active', true)->get();
+        $user = Auth::user();
+
+        // Verificar se o receivable pertence à empresa do usuário
+        if ($receivable->company_id !== $user->company_id && $user->role !== 'admin') {
+            abort(403, 'Acesso negado. Você só pode editar contas da sua empresa.');
+        }
+
+        $employees = Employee::where('company_id', $user->company_id)->where('active', true)->get();
         return view('receivables.edit', compact('receivable', 'employees'));
     }
 
     public function update(Request $request, Receivable $receivable)
     {
+        $user = Auth::user();
+
+        // Verificar se o receivable pertence à empresa do usuário
+        if ($receivable->company_id !== $user->company_id && $user->role !== 'admin') {
+            abort(403, 'Acesso negado. Você só pode atualizar contas da sua empresa.');
+        }
+
         $validated = $request->validate([
             'descricao' => 'required|string|max:255',
             'pessoa' => 'required|string|max:255',
@@ -100,12 +123,26 @@ class ReceivableController extends Controller
 
     public function destroy(Receivable $receivable)
     {
+        $user = Auth::user();
+
+        // Verificar se o receivable pertence à empresa do usuário
+        if ($receivable->company_id !== $user->company_id && $user->role !== 'admin') {
+            abort(403, 'Acesso negado. Você só pode remover contas da sua empresa.');
+        }
+
         $receivable->delete();
         return redirect()->route('receivables.index')->with('success', 'Conta a receber removida com sucesso!');
     }
 
     public function marcarComoRecebido(Receivable $receivable)
     {
+        $user = Auth::user();
+
+        // Verificar se o receivable pertence à empresa do usuário
+        if ($receivable->company_id !== $user->company_id && $user->role !== 'admin') {
+            abort(403, 'Acesso negado. Você só pode marcar contas da sua empresa como recebidas.');
+        }
+
         $receivable->update([
             'status' => 'recebido',
             'data_recebimento' => now()->toDateString()
